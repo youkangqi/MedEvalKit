@@ -23,12 +23,13 @@ from utils import (
     MIMIC_CXR,
     MedFrameQA,
     Radrestruct,
+    BreastUS,
     )
 
 #eval_MedQA_USMLE
 def prepare_benchmark(model,eval_dataset,eval_dataset_path,eval_output_path):
     # Hallu,Geometry3k
-    supported_dataset = ["MMMU-Medical-test","MMMU-Medical-val","PATH_VQA","PMC_VQA","VQA_RAD","SLAKE","MedQA_USMLE","MedMCQA","PubMedQA","OmniMedVQA","Medbullets_op4","Medbullets_op5","MedXpertQA-Text","MedXpertQA-MM","SuperGPQA""HealthBench","IU_XRAY","CheXpert_Plus","MIMIC_CXR","CMB","CMExam","CMMLU","MedQA_MCMLE","MedFrameQA"]
+    supported_dataset = ["MMMU-Medical-test","MMMU-Medical-val","PATH_VQA","PMC_VQA","VQA_RAD","SLAKE","MedQA_USMLE","MedMCQA","PubMedQA","OmniMedVQA","Medbullets_op4","Medbullets_op5","MedXpertQA-Text","MedXpertQA-MM","SuperGPQA""HealthBench","IU_XRAY","CheXpert_Plus","MIMIC_CXR","CMB","CMExam","CMMLU","MedQA_MCMLE","MedFrameQA","BreastUS-single","BreastUS-labeled","BreastUS-full"]
 
     if eval_dataset in ["MMMU-Medical-test", "MMMU-Medical-val"]:
         if eval_dataset_path:
@@ -107,6 +108,12 @@ def prepare_benchmark(model,eval_dataset,eval_dataset_path,eval_output_path):
     
     elif eval_dataset == "MedFrameQA":
         dataset = MedFrameQA(model,eval_dataset_path,eval_output_path)
+    elif eval_dataset == "BreastUS-single":
+        dataset = BreastUS(model,eval_dataset_path,eval_output_path,mode="single")
+    elif eval_dataset == "BreastUS-labeled":
+        dataset = BreastUS(model,eval_dataset_path,eval_output_path,mode="labeled")
+    elif eval_dataset == "BreastUS-full":
+        dataset = BreastUS(model,eval_dataset_path,eval_output_path,mode="full")
     elif eval_dataset == "Radrestruct":
         dataset = Radrestruct(model,eval_dataset_path,eval_output_path)
     else:
