@@ -17,6 +17,7 @@ MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-512}"
 TEMPERATURE="${TEMPERATURE:-0.2}"
 TOP_P="${TOP_P:-0.9}"
 USE_VLLM="${USE_VLLM:-False}"
+BATCH_SIZE="${BATCH_SIZE:-8}"
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 
 # Resolve local model path if not provided.
@@ -35,6 +36,9 @@ fi
 
 # Sequence sampling length; 0 = use all frames (still limited by MAX_IMAGE_NUM).
 BREASTUS_SEQ_LEN="${BREASTUS_SEQ_LEN:-0}"
+BREASTUS_SINGLE_LABELED_N="${BREASTUS_SINGLE_LABELED_N:-5}"
+BREASTUS_SINGLE_UNLABELED_N="${BREASTUS_SINGLE_UNLABELED_N:-5}"
+BREASTUS_SAMPLE_SEED="${BREASTUS_SAMPLE_SEED:-42}"
 ATTN_IMPL="${ATTN_IMPL:-sdpa}"
 
 # Optional: custom prompt or CSV name
@@ -42,10 +46,14 @@ ATTN_IMPL="${ATTN_IMPL:-sdpa}"
 # export BREASTUS_REPORTS_CSV=abus_b_g.csv
 
 export BREASTUS_SEQ_LEN
+export BREASTUS_SINGLE_LABELED_N
+export BREASTUS_SINGLE_UNLABELED_N
+export BREASTUS_SAMPLE_SEED
 export ATTN_IMPL
 export CUDA_VISIBLE_DEVICES
 export TEMPERATURE
 export TOP_P
+export BATCH_SIZE
 
 run_mode () {
   local mode="$1"
@@ -58,6 +66,8 @@ run_mode () {
     --model_path "${MODEL_PATH}" \
     --use_vllm "${USE_VLLM}" \
     --max_new_tokens "${MAX_NEW_TOKENS}" \
+    --temperature "${TEMPERATURE}" \
+    --top_p "${TOP_P}" \
     --max_image_num "${MAX_IMAGE_NUM}"
 }
 

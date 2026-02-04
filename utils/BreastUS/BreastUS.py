@@ -2,6 +2,7 @@ import os
 import json
 import csv
 import re
+import random
 from collections import Counter
 from PIL import Image
 from tqdm import tqdm
@@ -269,21 +270,63 @@ class BreastUS(BaseDataset):
     def _auto_single(self):
         images_root = os.path.join(self.dataset_path, self.images_dir)
         masks_root = os.path.join(self.dataset_path, self.masks_dir)
+        labeled_n = int(os.environ.get("BREASTUS_SINGLE_LABELED_N", "5"))
+        unlabeled_n = int(os.environ.get("BREASTUS_SINGLE_UNLABELED_N", "5"))
+        seed = int(os.environ.get("BREASTUS_SAMPLE_SEED", "42"))
+        rng = random.Random(seed)
+
         items = []
         for patient in sorted(os.listdir(images_root)):
             p_dir = os.path.join(images_root, patient)
             if not os.path.isdir(p_dir):
                 continue
-            for fname in sorted(os.listdir(p_dir)):
-                if not fname.lower().endswith(".png"):
-                    continue
-                rel_img = os.path.join(self.images_dir, patient, fname)
-                sample = {"id": f"{patient}_{fname}", "patient": patient, "image": rel_img}
+            img_files = [f for f in sorted(os.listdir(p_dir)) if f.lower().endswith(".png")]
+            if not img_files:
+                continue
+
+            labeled = []
+            unlabeled = []
+            for fname in img_files:
                 rel_mask = os.path.join(self.masks_dir, patient, fname)
                 if os.path.exists(os.path.join(self.dataset_path, rel_mask)):
-                    sample["mask"] = rel_mask
+                    labeled.append(fname)
+                else:
+                    unlabeled.append(fname)
+
+            if labeled_n > 0 and len(labeled) > labeled_n:
+                labeled = rng.sample(labeled, labeled_n)
+            elif labeled_n == 0:
+                labeled = []
+
+            if unlabeled_n > 0 and len(unlabeled) > unlabeled_n:
+                unlabeled = rng.sample(unlabeled, unlabeled_n)
+            elif unlabeled_n == 0:
+                unlabeled = []
+
+            for fname in labeled:
+                rel_img = os.path.join(self.images_dir, patient, fname)
+                rel_mask = os.path.join(self.masks_dir, patient, fname)
+                sample = {
+                    "id": f"{patient}_{fname}",
+                    "patient": patient,
+                    "image": rel_img,
+                    "mask": rel_mask,
+                    "label_type": "labeled",
+                }
                 self._resolve_report(sample)
                 items.append(sample)
+
+            for fname in unlabeled:
+                rel_img = os.path.join(self.images_dir, patient, fname)
+                sample = {
+                    "id": f"{patient}_{fname}",
+                    "patient": patient,
+                    "image": rel_img,
+                    "label_type": "unlabeled",
+                }
+                self._resolve_report(sample)
+                items.append(sample)
+
         return items
 
     def _auto_labeled_seq(self):

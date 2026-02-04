@@ -13,6 +13,12 @@ class BaseDataset:
     self.num_chunks = int(os.environ.get("num_chunks",1))
 
   def run(self,samples,model,batch_size = 2000):
+    env_bs = os.environ.get("BATCH_SIZE")
+    if env_bs:
+        try:
+            batch_size = int(env_bs)
+        except ValueError:
+            pass
     out_samples = []
     with torch.no_grad():
         messages_list = []
