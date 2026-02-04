@@ -6,3 +6,5 @@ datas/MedXpertQA
 *.tgz
 *.zip
 
+datas/
+LLaVA-NeXT
