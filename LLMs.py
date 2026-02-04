@@ -35,6 +35,16 @@ class Qwen2_5_VL:
             from models.Qwen2_5_VL.Qwen2_5_VL_hf import Qwen2_5_VL
         return Qwen2_5_VL(model_path, args)
 
+@LLMRegistry.register("Lingshu-7B")
+class Lingshu_7B:
+    def __new__(cls, model_path: str, args: Any) -> Any:
+        # Lingshu-7B uses Qwen2.5-VL architecture
+        if os.environ.get("use_vllm", "True") == "True":
+            from models.Qwen2_5_VL.Qwen2_5_VL_vllm import Qwen2_5_VL
+        else:
+            from models.Qwen2_5_VL.Qwen2_5_VL_hf import Qwen2_5_VL
+        return Qwen2_5_VL(model_path, args)
+
 @LLMRegistry.register("BiMediX2")
 class BiMediX2:
     def __new__(cls, model_path: str, args: Any) -> Any:
@@ -155,4 +165,3 @@ def init_llm(args):
         return model_class(args.model_path, args)
     except ValueError as e:
         raise ValueError(f"{args.model_name} not supported") from e
-
